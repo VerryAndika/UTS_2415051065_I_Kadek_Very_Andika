@@ -30,11 +30,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   Future<void> _toggleSaved() async {
     final collection = context.read<CollectionProvider>();
+    final messenger = ScaffoldMessenger.of(context);
     final saved = collection.findByKey(widget.book.key);
-    if (saved != null) {
-      await collection.remove(saved);
-    } else {
-      await collection.add(SavedBook.fromBook(widget.book));
+    try {
+      if (saved != null) {
+        await collection.remove(saved);
+      } else {
+        await collection.add(SavedBook.fromBook(widget.book));
+      }
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Gagal: $e')));
     }
   }
 
