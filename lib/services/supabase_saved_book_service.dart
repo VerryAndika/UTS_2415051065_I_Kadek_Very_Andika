@@ -51,8 +51,12 @@ class SupabaseSavedBookService implements SavedBookDataSource {
     return SavedBook.fromJson(rows.first);
   }
 
+  // DELETE berdasarkan id, dengan pengecekan baris yang benar-benar terhapus.
   @override
-  Future<void> delete(int id) {
-    throw UnimplementedError('Delete diimplementasikan pada tahap berikutnya');
+  Future<void> delete(int id) async {
+    final rows = await _table.delete().eq('id', id).select();
+    if (rows.isEmpty) {
+      throw StateError('Data tidak ditemukan atau tidak boleh dihapus');
+    }
   }
 }

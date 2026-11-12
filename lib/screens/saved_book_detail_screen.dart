@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/saved_book.dart';
 import '../providers/collection_provider.dart';
 import '../widgets/book_cover.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/rating_input.dart';
 import '../widgets/responsive.dart';
 import 'edit_book_screen.dart';
@@ -14,6 +15,30 @@ class SavedBookDetailScreen extends StatelessWidget {
   const SavedBookDetailScreen({super.key, required this.bookId});
 
   final int bookId;
+
+  // DELETE dengan confirmation dialog.
+  Future<void> _delete(BuildContext context, SavedBook book) async {
+    final ok = await showConfirmDialog(
+      context,
+      title: 'Hapus dari koleksi?',
+      message:
+          '"${book.title}" beserta rating dan catatannya akan dihapus '
+          'permanen dari database.',
+    );
+    if (!ok || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      await context.read<CollectionProvider>().remove(book);
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(content: Text('"${book.title}" dihapus dari koleksi')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Gagal menghapus: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +84,26 @@ class SavedBookDetailScreen extends StatelessWidget {
         const SizedBox(height: 4),
         Text(book.note ?? 'Belum ada catatan.'),
         const SizedBox(height: 20),
-        FilledButton.icon(
-          onPressed: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => EditBookScreen(book: book))),
-          icon: const Icon(Icons.edit),
-          label: const Text('Edit'),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => EditBookScreen(book: book)),
+              ),
+              icon: const Icon(Icons.edit),
+              label: const Text('Edit'),
+            ),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              onPressed: () => _delete(context, book),
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Hapus'),
+            ),
+          ],
         ),
       ],
     );
