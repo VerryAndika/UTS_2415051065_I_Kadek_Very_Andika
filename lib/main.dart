@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'config/app_config.dart';
+import 'config/app_theme.dart';
+
 // BookFinder - Project UTS Pemrograman Mobile
 // 2415051065 - I Kadek Very Andika (5 IKI)
+//
+// Arsitektur: UI (screens/widgets) -> providers -> repositories
+//             -> services (REST API / database) -> models
 void main() {
   runApp(const BookFinderApp());
 }
@@ -12,13 +18,16 @@ class BookFinderApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'BookFinder',
+      title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
       home: const Scaffold(
         body: Center(
-          child: Text('BookFinder\n2415051065 - I Kadek Very Andika',
-              textAlign: TextAlign.center),
+          child: Text(
+            '${AppConfig.appName}\n${AppConfig.studentId} - ${AppConfig.studentName}',
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
