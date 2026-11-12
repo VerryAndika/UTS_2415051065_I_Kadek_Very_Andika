@@ -7,6 +7,7 @@ import 'config/app_theme.dart';
 import 'config/supabase_config.dart';
 import 'providers/book_provider.dart';
 import 'providers/collection_provider.dart';
+import 'providers/theme_provider.dart';
 import 'repositories/book_repository.dart';
 import 'repositories/saved_book_repository.dart';
 import 'screens/home_shell.dart';
@@ -44,6 +45,7 @@ Future<void> main() async {
           create: (_) =>
               CollectionProvider(SavedBookRepository(savedSource))..load(),
         ),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const BookFinderApp(),
     ),
@@ -60,6 +62,7 @@ class BookFinderApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
+      themeMode: context.watch<ThemeProvider>().mode,
       home: const HomeShell(),
     );
   }

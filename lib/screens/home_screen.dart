@@ -6,6 +6,7 @@ import '../models/book.dart';
 import '../models/reading_status.dart';
 import '../providers/book_provider.dart';
 import '../providers/collection_provider.dart';
+import '../providers/theme_provider.dart';
 import '../widgets/book_card.dart';
 import '../widgets/responsive.dart';
 import '../widgets/section_header.dart';
@@ -85,7 +86,20 @@ class HomeScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppConfig.appName)),
+      appBar: AppBar(
+        title: const Text(AppConfig.appName),
+        actions: [
+          IconButton(
+            tooltip: 'Ganti tema',
+            icon: Icon(
+              context.watch<ThemeProvider>().isDark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: context.read<ThemeProvider>().toggle,
+          ),
+        ],
+      ),
       body: MaxWidth(
         child: ListView(
           children: [

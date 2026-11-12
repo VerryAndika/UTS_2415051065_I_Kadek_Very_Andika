@@ -24,6 +24,20 @@ class _CatalogScreenState extends State<CatalogScreen> {
     super.dispose();
   }
 
+  static const _categories = [
+    ('Pemrograman', 'programming'),
+    ('Fiksi', 'fiction'),
+    ('Sains', 'science'),
+    ('Sejarah', 'history'),
+    ('Bisnis', 'business'),
+    ('Indonesia', 'indonesia'),
+  ];
+
+  void _search(String query) {
+    FocusScope.of(context).unfocus();
+    context.read<BookProvider>().search(query);
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<BookProvider>();
@@ -65,14 +79,46 @@ class _CatalogScreenState extends State<CatalogScreen> {
             child: TextField(
               controller: _controller,
               textInputAction: TextInputAction.search,
-              onSubmitted: (q) => context.read<BookProvider>().search(q),
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
+              onSubmitted: _search,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
                 hintText: 'Cari judul atau penulis...',
+                suffixIcon: IconButton(
+                  tooltip: 'Cari',
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: () => _search(_controller.text),
+                ),
               ),
             ),
           ),
-          Expanded(child: body),
+          // Kategori cepat: tap chip -> cari berdasarkan topik.
+          SizedBox(
+            height: 52,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              children: [
+                for (final (label, query) in _categories)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(label),
+                      selected: provider.query == query,
+                      onSelected: (_) {
+                        _controller.text = query;
+                        _search(query);
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: context.read<BookProvider>().retry,
+              child: body,
+            ),
+          ),
         ],
       ),
     );

@@ -16,6 +16,32 @@ class SavedBookDetailScreen extends StatelessWidget {
 
   final int bookId;
 
+  Future<void> _changePage(
+    BuildContext context,
+    SavedBook book,
+    int delta,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final updated = await context.read<CollectionProvider>().changePage(
+        book,
+        delta,
+      );
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              'Progress diperbarui: halaman ${updated.currentPage}',
+            ),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Gagal memperbarui: $e')));
+    }
+  }
+
   // DELETE dengan confirmation dialog.
   Future<void> _delete(BuildContext context, SavedBook book) async {
     final ok = await showConfirmDialog(
@@ -79,6 +105,19 @@ class SavedBookDetailScreen extends StatelessWidget {
           ),
         ] else
           Text('Halaman terakhir: ${book.currentPage}'),
+        const SizedBox(height: 8),
+        // Update cepat progress halaman (fitur tambahan).
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final delta in const [-10, 10, 25])
+              ActionChip(
+                avatar: Icon(delta < 0 ? Icons.remove : Icons.add, size: 18),
+                label: Text('${delta.abs()} hal'),
+                onPressed: () => _changePage(context, book, delta),
+              ),
+          ],
+        ),
         const SizedBox(height: 16),
         Text('Catatan', style: text.titleMedium),
         const SizedBox(height: 4),
