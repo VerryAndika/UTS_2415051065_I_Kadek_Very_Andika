@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../config/app_config.dart';
+import '../models/sample_books.dart';
 import '../widgets/book_card.dart';
 import '../widgets/responsive.dart';
 import '../widgets/section_header.dart';
@@ -15,15 +16,6 @@ class HomeScreen extends StatelessWidget {
   // Callback dari HomeShell untuk pindah ke tab Katalog.
   final VoidCallback? onOpenCatalog;
 
-  static const _dummyBooks = <Map<String, String>>[
-    {'title': 'Clean Code', 'author': 'Robert C. Martin'},
-    {'title': 'The Pragmatic Programmer', 'author': 'Andrew Hunt'},
-    {'title': 'Atomic Habits', 'author': 'James Clear'},
-    {'title': 'Laskar Pelangi', 'author': 'Andrea Hirata'},
-    {'title': 'Bumi Manusia', 'author': 'Pramoedya Ananta Toer'},
-    {'title': 'Sapiens', 'author': 'Yuval Noah Harari'},
-  ];
-
   static const _stats = [
     ('Ingin dibaca', '0', Icons.bookmark_add),
     ('Sedang dibaca', '0', Icons.auto_stories),
@@ -36,11 +28,12 @@ class HomeScreen extends StatelessWidget {
     final compact = Responsive.isCompact(context);
 
     Widget bookAt(BuildContext context, int i) => BookCard(
-      title: _dummyBooks[i]['title']!,
-      author: _dummyBooks[i]['author']!,
+      title: sampleBooks[i].title,
+      author: sampleBooks[i].authorText,
+      coverUrl: sampleBooks[i].coverUrl(),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => BookDetailScreen(book: _dummyBooks[i]),
+          builder: (_) => BookDetailScreen(book: sampleBooks[i]),
         ),
       ),
     );
@@ -101,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: _dummyBooks.length,
+                  itemCount: sampleBooks.length,
                   separatorBuilder: (_, _) => const SizedBox(width: 4),
                   itemBuilder: (context, i) =>
                       SizedBox(width: 150, child: bookAt(context, i)),
@@ -111,7 +104,7 @@ class HomeScreen extends StatelessWidget {
               ResponsiveGrid(
                 shrinkWrap: true,
                 minItemWidth: 170,
-                itemCount: _dummyBooks.length,
+                itemCount: sampleBooks.length,
                 itemBuilder: bookAt,
               ),
           ],
