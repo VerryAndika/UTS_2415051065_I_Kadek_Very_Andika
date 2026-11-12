@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../config/app_config.dart';
 import '../widgets/book_card.dart';
+import '../widgets/responsive.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
 
@@ -15,76 +16,91 @@ class HomeScreen extends StatelessWidget {
     {'title': 'The Pragmatic Programmer', 'author': 'Andrew Hunt'},
     {'title': 'Atomic Habits', 'author': 'James Clear'},
     {'title': 'Laskar Pelangi', 'author': 'Andrea Hirata'},
+    {'title': 'Bumi Manusia', 'author': 'Pramoedya Ananta Toer'},
+    {'title': 'Sapiens', 'author': 'Yuval Noah Harari'},
+  ];
+
+  static const _stats = [
+    ('Ingin dibaca', '0', Icons.bookmark_add),
+    ('Sedang dibaca', '0', Icons.auto_stories),
+    ('Selesai', '0', Icons.task_alt),
+    ('Rata-rata rating', '-', Icons.star),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final compact = Responsive.isCompact(context);
+
+    Widget bookAt(BuildContext context, int i) => BookCard(
+          title: _dummyBooks[i]['title']!,
+          author: _dummyBooks[i]['author']!,
+        );
+
     return Scaffold(
       appBar: AppBar(title: const Text(AppConfig.appName)),
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Halo, ${AppConfig.studentName}',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const Text(
-                  '${AppConfig.studentId} • ${AppConfig.studentClass}',
-                ),
-                const SizedBox(height: 12),
-                const TextField(
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search),
-                    hintText: 'Cari judul atau penulis...',
+      body: MaxWidth(
+        child: ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Halo, ${AppConfig.studentName}',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SectionHeader(title: 'Koleksi Saya'),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: StatCard(
-                    label: 'Ingin dibaca',
-                    value: '0',
-                    icon: Icons.bookmark_add,
+                  const Text(
+                    '${AppConfig.studentId} • ${AppConfig.studentClass}',
                   ),
-                ),
-                Expanded(
-                  child: StatCard(
-                    label: 'Selesai',
-                    value: '0',
-                    icon: Icons.task_alt,
+                  const SizedBox(height: 12),
+                  const TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: 'Cari judul atau penulis...',
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SectionHeader(title: 'Rekomendasi'),
-          SizedBox(
-            height: 250,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: _dummyBooks.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 4),
-              itemBuilder: (context, i) => SizedBox(
-                width: 150,
-                child: BookCard(
-                  title: _dummyBooks[i]['title']!,
-                  author: _dummyBooks[i]['author']!,
-                ),
+                ],
               ),
             ),
-          ),
-        ],
+            const SectionHeader(title: 'Koleksi Saya'),
+            // Compact: grid 2 kolom; layar lebar: 4 kartu dalam satu baris.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: GridView.count(
+                crossAxisCount: compact ? 2 : 4,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                childAspectRatio: compact ? 2.1 : 2.6,
+                children: [
+                  for (final (label, value, icon) in _stats)
+                    StatCard(label: label, value: value, icon: icon),
+                ],
+              ),
+            ),
+            const SectionHeader(title: 'Rekomendasi'),
+            // Compact: list horizontal; layar lebar: grid responsif.
+            if (compact)
+              SizedBox(
+                height: 250,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: _dummyBooks.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 4),
+                  itemBuilder: (context, i) =>
+                      SizedBox(width: 150, child: bookAt(context, i)),
+                ),
+              )
+            else
+              ResponsiveGrid(
+                shrinkWrap: true,
+                minItemWidth: 170,
+                itemCount: _dummyBooks.length,
+                itemBuilder: bookAt,
+              ),
+          ],
+        ),
       ),
     );
   }
