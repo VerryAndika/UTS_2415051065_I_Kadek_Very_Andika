@@ -80,11 +80,35 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const LinearProgressIndicator();
             }
-            final description = snapshot.data?.description;
-            return Text(
-              description == null || description.isEmpty
-                  ? 'Deskripsi belum tersedia.'
-                  : description,
+            final detail = snapshot.data;
+            final description = detail?.description;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Deskripsi', style: text.titleMedium),
+                const SizedBox(height: 4),
+                Text(
+                  description == null || description.isEmpty
+                      ? 'Deskripsi belum tersedia.'
+                      : description,
+                ),
+                if (detail != null && detail.subjects.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text('Subjek', style: text.titleMedium),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final s in detail.subjects)
+                        Chip(
+                          label: Text(s),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                    ],
+                  ),
+                ],
+              ],
             );
           },
         ),

@@ -9,6 +9,7 @@ import 'repositories/book_repository.dart';
 import 'repositories/saved_book_repository.dart';
 import 'screens/home_shell.dart';
 import 'services/book_data_source.dart';
+import 'services/open_library_service.dart';
 import 'services/saved_book_data_source.dart';
 
 // BookFinder - Project UTS Pemrograman Mobile
@@ -18,7 +19,7 @@ import 'services/saved_book_data_source.dart';
 //             -> services (REST API / database) -> models
 void main() {
   // Sumber data dipilih di satu tempat ini saja.
-  final BookDataSource bookSource = SampleBookService();
+  final BookDataSource bookSource = OpenLibraryService();
   final SavedBookDataSource savedSource = InMemorySavedBookService();
 
   runApp(
