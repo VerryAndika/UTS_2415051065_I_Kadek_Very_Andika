@@ -133,6 +133,11 @@ class CollectionScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Koleksi Saya'),
         actions: [
+          IconButton(
+            tooltip: 'Muat ulang',
+            icon: const Icon(Icons.refresh),
+            onPressed: provider.isLoading ? null : provider.load,
+          ),
           PopupMenuButton<CollectionSort>(
             tooltip: 'Urutkan',
             icon: const Icon(Icons.sort),
