@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../providers/collection_provider.dart';
 import '../widgets/book_cover.dart';
+import 'edit_book_screen.dart';
+import 'saved_book_detail_screen.dart';
 
 // Koleksi Saya: daftar buku tersimpan dari CollectionProvider (shared state).
 class CollectionScreen extends StatelessWidget {
@@ -30,6 +32,18 @@ class CollectionScreen extends StatelessWidget {
               leading: BookCover(url: book.coverUrl, width: 40, height: 60),
               title: Text(book.title),
               subtitle: Text('${book.author} • ${book.status.label}'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => SavedBookDetailScreen(bookId: book.id!),
+                ),
+              ),
+              trailing: IconButton(
+                tooltip: 'Edit',
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => EditBookScreen(book: book)),
+                ),
+              ),
             ),
           );
         },

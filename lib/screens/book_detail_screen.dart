@@ -7,6 +7,7 @@ import '../providers/collection_provider.dart';
 import '../widgets/book_cover.dart';
 import '../widgets/responsive.dart';
 import 'add_book_screen.dart';
+import 'saved_book_detail_screen.dart';
 
 // Detail buku: menerima objek Book dari layar sebelumnya (passing data),
 // lalu memuat deskripsi lengkap lewat BookProvider.
@@ -38,7 +39,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   Widget build(BuildContext context) {
     final book = widget.book;
     final text = Theme.of(context).textTheme;
-    final isSaved = context.watch<CollectionProvider>().isSaved(book.key);
+    final saved = context.watch<CollectionProvider>().findByKey(book.key);
 
     final info = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,11 +65,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        isSaved
+        saved != null
             ? FilledButton.tonalIcon(
-                onPressed: null,
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => SavedBookDetailScreen(bookId: saved.id!),
+                  ),
+                ),
                 icon: const Icon(Icons.bookmark_added),
-                label: const Text('Sudah ada di Koleksi'),
+                label: Text('Di koleksi • ${saved.status.label}'),
               )
             : FilledButton.icon(
                 onPressed: _openAddForm,

@@ -32,9 +32,23 @@ class SupabaseSavedBookService implements SavedBookDataSource {
     return SavedBook.fromJson(row);
   }
 
+  // UPDATE berdasarkan id. select() memastikan baris benar-benar berubah
+  // (jika id tidak ada / ditolak RLS, Supabase tidak menganggapnya error).
   @override
-  Future<SavedBook> update(SavedBook book) {
-    throw UnimplementedError('Update diimplementasikan pada tahap berikutnya');
+  Future<SavedBook> update(SavedBook book) async {
+    final id = book.id;
+    if (id == null) throw ArgumentError('Data belum memiliki id');
+    final rows = await _table
+        .update({
+          ...book.toJson(),
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', id)
+        .select();
+    if (rows.isEmpty) {
+      throw StateError('Data tidak ditemukan atau tidak boleh diubah');
+    }
+    return SavedBook.fromJson(rows.first);
   }
 
   @override

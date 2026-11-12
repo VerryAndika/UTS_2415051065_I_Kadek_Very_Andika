@@ -52,6 +52,20 @@ class CollectionProvider extends ChangeNotifier {
     return created;
   }
 
+  Future<SavedBook> update(SavedBook book) async {
+    final updated = await _repository.update(book);
+    _items = [for (final b in _items) b.id == updated.id ? updated : b];
+    notifyListeners();
+    return updated;
+  }
+
+  SavedBook? findById(int? id) {
+    for (final b in _items) {
+      if (b.id == id) return b;
+    }
+    return null;
+  }
+
   Future<void> remove(SavedBook book) async {
     final id = book.id;
     if (id == null) return;
