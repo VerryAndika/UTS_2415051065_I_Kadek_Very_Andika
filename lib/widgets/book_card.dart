@@ -44,8 +44,9 @@ class BookCard extends StatelessWidget {
                           title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: text.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                          style: text.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(

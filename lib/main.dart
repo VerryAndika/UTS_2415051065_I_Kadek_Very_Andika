@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'config/app_config.dart';
 import 'config/app_theme.dart';
-import 'screens/home_screen.dart';
+import 'screens/home_shell.dart';
 
 // BookFinder - Project UTS Pemrograman Mobile
 // 2415051065 - I Kadek Very Andika (5 IKI)
@@ -23,7 +23,7 @@ class BookFinderApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      home: const HomeScreen(),
+      home: const HomeShell(),
     );
   }
 }

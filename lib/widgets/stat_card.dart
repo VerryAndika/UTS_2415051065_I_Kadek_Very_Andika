@@ -36,9 +36,7 @@ class StatCard extends StatelessWidget {
                 children: [
                   Text(
                     value,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
+                    style: Theme.of(context).textTheme.titleLarge
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),

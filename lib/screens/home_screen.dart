@@ -5,13 +5,17 @@ import '../widgets/book_card.dart';
 import '../widgets/responsive.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
+import 'book_detail_screen.dart';
 
 // Home/Dashboard: sapaan, pencarian cepat, ringkasan koleksi, rekomendasi.
 // (Data masih dummy; akan diganti REST API & database pada tahap berikutnya.)
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onOpenCatalog});
 
-  static const _dummyBooks = [
+  // Callback dari HomeShell untuk pindah ke tab Katalog.
+  final VoidCallback? onOpenCatalog;
+
+  static const _dummyBooks = <Map<String, String>>[
     {'title': 'Clean Code', 'author': 'Robert C. Martin'},
     {'title': 'The Pragmatic Programmer', 'author': 'Andrew Hunt'},
     {'title': 'Atomic Habits', 'author': 'James Clear'},
@@ -32,9 +36,14 @@ class HomeScreen extends StatelessWidget {
     final compact = Responsive.isCompact(context);
 
     Widget bookAt(BuildContext context, int i) => BookCard(
-          title: _dummyBooks[i]['title']!,
-          author: _dummyBooks[i]['author']!,
-        );
+      title: _dummyBooks[i]['title']!,
+      author: _dummyBooks[i]['author']!,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => BookDetailScreen(book: _dummyBooks[i]),
+        ),
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text(AppConfig.appName)),
@@ -54,8 +63,10 @@ class HomeScreen extends StatelessWidget {
                     '${AppConfig.studentId} • ${AppConfig.studentClass}',
                   ),
                   const SizedBox(height: 12),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    readOnly: true,
+                    onTap: onOpenCatalog,
+                    decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.search),
                       hintText: 'Cari judul atau penulis...',
                     ),
@@ -78,7 +89,11 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SectionHeader(title: 'Rekomendasi'),
+            SectionHeader(
+              title: 'Rekomendasi',
+              action: 'Lihat semua',
+              onAction: onOpenCatalog,
+            ),
             // Compact: list horizontal; layar lebar: grid responsif.
             if (compact)
               SizedBox(
