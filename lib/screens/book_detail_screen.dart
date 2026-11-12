@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/book.dart';
-import '../models/saved_book.dart';
 import '../providers/book_provider.dart';
 import '../providers/collection_provider.dart';
 import '../widgets/book_cover.dart';
 import '../widgets/responsive.dart';
+import 'add_book_screen.dart';
 
 // Detail buku: menerima objek Book dari layar sebelumnya (passing data),
 // lalu memuat deskripsi lengkap lewat BookProvider.
@@ -28,19 +28,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     _detail = context.read<BookProvider>().getDetail(widget.book);
   }
 
-  Future<void> _toggleSaved() async {
-    final collection = context.read<CollectionProvider>();
-    final messenger = ScaffoldMessenger.of(context);
-    final saved = collection.findByKey(widget.book.key);
-    try {
-      if (saved != null) {
-        await collection.remove(saved);
-      } else {
-        await collection.add(SavedBook.fromBook(widget.book));
-      }
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Gagal: $e')));
-    }
+  Future<void> _openAddForm() async {
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => AddBookScreen(book: widget.book)),
+    );
   }
 
   @override
@@ -73,11 +64,17 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        FilledButton.icon(
-          onPressed: _toggleSaved,
-          icon: Icon(isSaved ? Icons.bookmark_remove : Icons.bookmark_add),
-          label: Text(isSaved ? 'Hapus dari Koleksi' : 'Simpan ke Koleksi'),
-        ),
+        isSaved
+            ? FilledButton.tonalIcon(
+                onPressed: null,
+                icon: const Icon(Icons.bookmark_added),
+                label: const Text('Sudah ada di Koleksi'),
+              )
+            : FilledButton.icon(
+                onPressed: _openAddForm,
+                icon: const Icon(Icons.bookmark_add),
+                label: const Text('Tambah ke Koleksi'),
+              ),
         const SizedBox(height: 16),
         FutureBuilder<Book>(
           future: _detail,

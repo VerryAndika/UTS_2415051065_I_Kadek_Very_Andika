@@ -25,9 +25,11 @@ class SupabaseSavedBookService implements SavedBookDataSource {
     return rows.map(SavedBook.fromJson).toList();
   }
 
+  // CREATE: INSERT lalu kembalikan baris baru (id & created_at dari database).
   @override
-  Future<SavedBook> create(SavedBook book) {
-    throw UnimplementedError('Create diimplementasikan pada tahap berikutnya');
+  Future<SavedBook> create(SavedBook book) async {
+    final row = await _table.insert(book.toJson()).select().single();
+    return SavedBook.fromJson(row);
   }
 
   @override
