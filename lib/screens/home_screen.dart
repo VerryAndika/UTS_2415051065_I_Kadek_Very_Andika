@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../config/app_config.dart';
-import '../models/sample_books.dart';
+import '../models/book.dart';
+import '../models/reading_status.dart';
+import '../providers/book_provider.dart';
+import '../providers/collection_provider.dart';
 import '../widgets/book_card.dart';
 import '../widgets/responsive.dart';
 import '../widgets/section_header.dart';
@@ -9,34 +13,76 @@ import '../widgets/stat_card.dart';
 import 'book_detail_screen.dart';
 
 // Home/Dashboard: sapaan, pencarian cepat, ringkasan koleksi, rekomendasi.
-// (Data masih dummy; akan diganti REST API & database pada tahap berikutnya.)
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, this.onOpenCatalog});
 
   // Callback dari HomeShell untuk pindah ke tab Katalog.
   final VoidCallback? onOpenCatalog;
 
-  static const _stats = [
-    ('Ingin dibaca', '0', Icons.bookmark_add),
-    ('Sedang dibaca', '0', Icons.auto_stories),
-    ('Selesai', '0', Icons.task_alt),
-    ('Rata-rata rating', '-', Icons.star),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final compact = Responsive.isCompact(context);
+    final books = context.watch<BookProvider>();
+    final collection = context.watch<CollectionProvider>();
+    final recommended = books.recommended;
 
-    Widget bookAt(BuildContext context, int i) => BookCard(
-      title: sampleBooks[i].title,
-      author: sampleBooks[i].authorText,
-      coverUrl: sampleBooks[i].coverUrl(),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => BookDetailScreen(book: sampleBooks[i]),
+    Widget bookAt(BuildContext context, int i) {
+      final Book book = recommended[i];
+      return BookCard(
+        title: book.title,
+        author: book.authorText,
+        coverUrl: book.coverUrl(),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => BookDetailScreen(book: book))),
+      );
+    }
+
+    final stats = [
+      for (final s in ReadingStatus.values)
+        StatCard(
+          label: s.label,
+          value: '${collection.countByStatus(s)}',
+          icon: s.icon,
         ),
+      StatCard(
+        label: 'Total koleksi',
+        value: '${collection.items.length}',
+        icon: Icons.collections_bookmark,
       ),
-    );
+    ];
+
+    Widget recommendations;
+    if (books.isLoadingRecommended) {
+      recommendations = const Padding(
+        padding: EdgeInsets.all(24),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    } else if (books.recommendedError != null) {
+      recommendations = Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(books.recommendedError!),
+      );
+    } else if (compact) {
+      recommendations = SizedBox(
+        height: 250,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          itemCount: recommended.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 4),
+          itemBuilder: (context, i) =>
+              SizedBox(width: 150, child: bookAt(context, i)),
+        ),
+      );
+    } else {
+      recommendations = ResponsiveGrid(
+        shrinkWrap: true,
+        minItemWidth: 170,
+        itemCount: recommended.length,
+        itemBuilder: bookAt,
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text(AppConfig.appName)),
@@ -76,10 +122,7 @@ class HomeScreen extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 childAspectRatio: compact ? 2.1 : 2.6,
-                children: [
-                  for (final (label, value, icon) in _stats)
-                    StatCard(label: label, value: value, icon: icon),
-                ],
+                children: stats,
               ),
             ),
             SectionHeader(
@@ -87,26 +130,7 @@ class HomeScreen extends StatelessWidget {
               action: 'Lihat semua',
               onAction: onOpenCatalog,
             ),
-            // Compact: list horizontal; layar lebar: grid responsif.
-            if (compact)
-              SizedBox(
-                height: 250,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: sampleBooks.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 4),
-                  itemBuilder: (context, i) =>
-                      SizedBox(width: 150, child: bookAt(context, i)),
-                ),
-              )
-            else
-              ResponsiveGrid(
-                shrinkWrap: true,
-                minItemWidth: 170,
-                itemCount: sampleBooks.length,
-                itemBuilder: bookAt,
-              ),
+            recommendations,
           ],
         ),
       ),

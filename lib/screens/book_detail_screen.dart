@@ -1,18 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/book.dart';
+import '../models/saved_book.dart';
+import '../providers/book_provider.dart';
+import '../providers/collection_provider.dart';
 import '../widgets/book_cover.dart';
 import '../widgets/responsive.dart';
 
-// Detail buku: menerima objek Book dari layar sebelumnya lewat constructor.
-class BookDetailScreen extends StatelessWidget {
+// Detail buku: menerima objek Book dari layar sebelumnya (passing data),
+// lalu memuat deskripsi lengkap lewat BookProvider.
+class BookDetailScreen extends StatefulWidget {
   const BookDetailScreen({super.key, required this.book});
 
   final Book book;
 
   @override
+  State<BookDetailScreen> createState() => _BookDetailScreenState();
+}
+
+class _BookDetailScreenState extends State<BookDetailScreen> {
+  late Future<Book> _detail;
+
+  @override
+  void initState() {
+    super.initState();
+    _detail = context.read<BookProvider>().getDetail(widget.book);
+  }
+
+  Future<void> _toggleSaved() async {
+    final collection = context.read<CollectionProvider>();
+    final saved = collection.findByKey(widget.book.key);
+    if (saved != null) {
+      await collection.remove(saved);
+    } else {
+      await collection.add(SavedBook.fromBook(widget.book));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final book = widget.book;
     final text = Theme.of(context).textTheme;
+    final isSaved = context.watch<CollectionProvider>().isSaved(book.key);
+
     final info = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -35,6 +66,27 @@ class BookDetailScreen extends StatelessWidget {
                 label: Text('${book.pageCount} halaman'),
               ),
           ],
+        ),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: _toggleSaved,
+          icon: Icon(isSaved ? Icons.bookmark_remove : Icons.bookmark_add),
+          label: Text(isSaved ? 'Hapus dari Koleksi' : 'Simpan ke Koleksi'),
+        ),
+        const SizedBox(height: 16),
+        FutureBuilder<Book>(
+          future: _detail,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const LinearProgressIndicator();
+            }
+            final description = snapshot.data?.description;
+            return Text(
+              description == null || description.isEmpty
+                  ? 'Deskripsi belum tersedia.'
+                  : description,
+            );
+          },
         ),
       ],
     );
