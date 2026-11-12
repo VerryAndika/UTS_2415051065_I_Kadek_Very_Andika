@@ -60,9 +60,22 @@ class HomeScreen extends StatelessWidget {
         child: Center(child: CircularProgressIndicator()),
       );
     } else if (books.recommendedError != null) {
-      recommendations = Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(books.recommendedError!),
+      recommendations = Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        child: ListTile(
+          leading: const Icon(Icons.wifi_off_rounded),
+          title: const Text('Rekomendasi gagal dimuat'),
+          subtitle: Text(books.recommendedError!),
+          trailing: TextButton(
+            onPressed: books.loadRecommendations,
+            child: const Text('Coba lagi'),
+          ),
+        ),
+      );
+    } else if (recommended.isEmpty) {
+      recommendations = const Padding(
+        padding: EdgeInsets.all(16),
+        child: Text('Belum ada rekomendasi.'),
       );
     } else if (compact) {
       recommendations = SizedBox(

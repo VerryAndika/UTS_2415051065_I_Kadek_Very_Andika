@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/reading_status.dart';
 import '../models/saved_book.dart';
+import '../services/app_exception.dart';
 import '../repositories/saved_book_repository.dart';
 
 // Urutan daftar koleksi.
@@ -25,13 +26,14 @@ class CollectionProvider extends ChangeNotifier {
 
   List<SavedBook> _items = [];
   bool _isLoading = false;
-  String? _error;
+  AppException? _error;
   ReadingStatus? _filter; // null = semua status
   CollectionSort _sort = CollectionSort.newest;
 
   List<SavedBook> get items => List.unmodifiable(_items);
   bool get isLoading => _isLoading;
-  String? get error => _error;
+  String? get error => _error?.message;
+  bool get errorIsNetwork => _error?.isNetwork ?? false;
   ReadingStatus? get filter => _filter;
   CollectionSort get sort => _sort;
 
@@ -108,7 +110,7 @@ class CollectionProvider extends ChangeNotifier {
     try {
       _items = await _repository.getAll();
     } catch (e) {
-      _error = e.toString();
+      _error = AppException.from(e, action: 'memuat koleksi');
     } finally {
       _isLoading = false;
       notifyListeners();

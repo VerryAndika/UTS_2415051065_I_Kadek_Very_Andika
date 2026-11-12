@@ -5,6 +5,7 @@ import '../providers/book_provider.dart';
 import '../providers/collection_provider.dart';
 import '../widgets/book_card.dart';
 import '../widgets/responsive.dart';
+import '../widgets/state_views.dart';
 import 'book_detail_screen.dart';
 
 // List/Catalog: pencarian + grid responsif. Data dari BookProvider.
@@ -45,9 +46,21 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
     Widget body;
     if (provider.isLoading) {
-      body = const Center(child: CircularProgressIndicator());
+      body = LoadingView(message: 'Mencari "${provider.query}"...');
     } else if (provider.error != null) {
-      body = Center(child: Text(provider.error!));
+      body = ErrorView(
+        message: provider.error!,
+        isNetwork: provider.errorIsNetwork,
+        onRetry: provider.retry,
+      );
+    } else if (provider.results.isEmpty) {
+      body = EmptyView(
+        icon: Icons.search_off,
+        title: 'Buku tidak ditemukan',
+        message:
+            'Tidak ada hasil untuk "${provider.query}". '
+            'Coba kata kunci lain.',
+      );
     } else {
       final books = provider.results;
       body = ResponsiveGrid(

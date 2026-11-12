@@ -87,6 +87,26 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const LinearProgressIndicator();
             }
+            if (snapshot.hasError) {
+              // Error detail tidak menutup seluruh halaman: info dasar
+              // dari katalog tetap tampil, ditambah tombol coba lagi.
+              return Card(
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: ListTile(
+                  leading: const Icon(Icons.error_outline),
+                  title: const Text('Deskripsi gagal dimuat'),
+                  subtitle: Text('${snapshot.error}'),
+                  trailing: TextButton(
+                    onPressed: () => setState(() {
+                      _detail = context.read<BookProvider>().getDetail(
+                        widget.book,
+                      );
+                    }),
+                    child: const Text('Coba lagi'),
+                  ),
+                ),
+              );
+            }
             final detail = snapshot.data;
             final description = detail?.description;
             return Column(

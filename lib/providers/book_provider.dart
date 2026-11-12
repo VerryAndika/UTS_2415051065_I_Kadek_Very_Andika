@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/book.dart';
+import '../services/app_exception.dart';
 import '../repositories/book_repository.dart';
 
 // State katalog: hasil pencarian + rekomendasi, masing-masing dengan
@@ -16,23 +17,24 @@ class BookProvider extends ChangeNotifier {
   // --- Pencarian (Katalog) ---
   List<Book> _results = [];
   bool _isLoading = false;
-  String? _error;
+  AppException? _error;
   String _query = '';
 
   List<Book> get results => List.unmodifiable(_results);
   bool get isLoading => _isLoading;
-  String? get error => _error;
+  String? get error => _error?.message;
+  bool get errorIsNetwork => _error?.isNetwork ?? false;
   String get query => _query;
   bool get hasSearched => _query.isNotEmpty;
 
   // --- Rekomendasi (Home) ---
   List<Book> _recommended = [];
   bool _isLoadingRecommended = false;
-  String? _recommendedError;
+  AppException? _recommendedError;
 
   List<Book> get recommended => List.unmodifiable(_recommended);
   bool get isLoadingRecommended => _isLoadingRecommended;
-  String? get recommendedError => _recommendedError;
+  String? get recommendedError => _recommendedError?.message;
 
   Future<void> search(String query) async {
     final q = query.trim();
@@ -45,7 +47,7 @@ class BookProvider extends ChangeNotifier {
       _results = await _repository.searchBooks(q);
     } catch (e) {
       _results = [];
-      _error = e.toString();
+      _error = AppException.from(e, action: 'mencari buku');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -61,7 +63,7 @@ class BookProvider extends ChangeNotifier {
     try {
       _recommended = await _repository.searchBooks(recommendationQuery);
     } catch (e) {
-      _recommendedError = e.toString();
+      _recommendedError = AppException.from(e, action: 'memuat rekomendasi');
     } finally {
       _isLoadingRecommended = false;
       notifyListeners();

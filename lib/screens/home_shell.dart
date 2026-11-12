@@ -36,7 +36,7 @@ class _HomeShellState extends State<HomeShell> {
     final pages = [
       HomeScreen(onOpenCatalog: () => _select(1)),
       const CatalogScreen(),
-      const CollectionScreen(),
+      CollectionScreen(onOpenCatalog: () => _select(1)),
       const ProfileScreen(),
     ];
     final body = IndexedStack(index: _index, children: pages);

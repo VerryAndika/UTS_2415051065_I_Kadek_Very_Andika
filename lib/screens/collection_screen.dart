@@ -7,13 +7,16 @@ import '../providers/collection_provider.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/responsive.dart';
 import '../widgets/saved_book_tile.dart';
+import '../widgets/state_views.dart';
 import 'edit_book_screen.dart';
 import 'saved_book_detail_screen.dart';
 
 // Koleksi Saya: data dari database (CollectionProvider), dengan filter
 // status, urutan, pull-to-refresh, swipe-to-delete, dan layout responsif.
 class CollectionScreen extends StatelessWidget {
-  const CollectionScreen({super.key});
+  const CollectionScreen({super.key, this.onOpenCatalog});
+
+  final VoidCallback? onOpenCatalog;
 
   Future<bool> _confirmDelete(BuildContext context, SavedBook book) async {
     final ok = await showConfirmDialog(
@@ -67,20 +70,35 @@ class CollectionScreen extends StatelessWidget {
 
     Widget body;
     if (provider.isLoading && provider.items.isEmpty) {
-      body = const Center(child: CircularProgressIndicator());
+      body = const LoadingView(message: 'Memuat koleksi dari database...');
     } else if (provider.error != null) {
-      body = ListView(
-        children: [
-          const SizedBox(height: 120),
-          Center(child: Text(provider.error!)),
-        ],
+      body = ErrorView(
+        message: provider.error!,
+        isNetwork: provider.errorIsNetwork,
+        onRetry: provider.load,
+      );
+    } else if (provider.items.isEmpty) {
+      body = EmptyView(
+        icon: Icons.collections_bookmark_outlined,
+        title: 'Koleksi masih kosong',
+        message: 'Cari buku di katalog lalu tambahkan ke koleksimu.',
+        action: onOpenCatalog == null
+            ? null
+            : FilledButton.icon(
+                onPressed: onOpenCatalog,
+                icon: const Icon(Icons.search),
+                label: const Text('Cari buku'),
+              ),
       );
     } else if (items.isEmpty) {
-      body = ListView(
-        children: const [
-          SizedBox(height: 120),
-          Center(child: Text('Belum ada buku di koleksi.')),
-        ],
+      body = EmptyView(
+        icon: Icons.filter_alt_off_outlined,
+        title: 'Tidak ada buku',
+        message: 'Belum ada buku dengan status "${provider.filter?.label}".',
+        action: TextButton(
+          onPressed: () => provider.setFilter(null),
+          child: const Text('Tampilkan semua'),
+        ),
       );
     } else {
       // Compact: list 1 kolom; layar lebar: 2–3 kolom.
