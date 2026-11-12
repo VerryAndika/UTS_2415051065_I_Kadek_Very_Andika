@@ -12,6 +12,9 @@ class SavedBookTile extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
 
+  /// Tinggi tetap saat dipakai di grid (mainAxisExtent).
+  static const double height = 132;
+
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
@@ -39,7 +42,7 @@ class SavedBookTile extends StatelessWidget {
                   children: [
                     Text(
                       book.title,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,

@@ -1,6 +1,7 @@
 import 'book.dart';
 
-// Data contoh sementara (sebelum REST API terhubung) dan untuk widget test.
+// Data contoh (key & cover asli Open Library) untuk SampleBookService
+// dan widget test, sehingga aplikasi bisa diuji tanpa jaringan.
 const sampleBooks = <Book>[
   Book(
     key: '/works/OL17618370W',
@@ -11,23 +12,27 @@ const sampleBooks = <Book>[
     pageCount: 444,
   ),
   Book(
-    key: '/works/OL17930368W',
+    key: '/works/OL5748544W',
     title: 'The Pragmatic Programmer',
-    authors: ['Andrew Hunt', 'David Thomas'],
+    authors: ['Andy Hunt', 'Dave Thomas'],
     firstPublishYear: 1999,
-    pageCount: 321,
+    coverId: 10143650,
+    pageCount: 352,
   ),
   Book(
-    key: '/works/OL17930364W',
+    key: '/works/OL17930368W',
     title: 'Atomic Habits',
     authors: ['James Clear'],
     firstPublishYear: 2016,
-    pageCount: 320,
+    coverId: 12539702,
+    pageCount: 322,
   ),
   Book(
-    key: '/works/OL5735363W',
+    key: '/works/OL15302003W',
     title: 'Laskar Pelangi',
     authors: ['Andrea Hirata'],
     firstPublishYear: 2005,
+    coverId: 7079796,
+    pageCount: 534,
   ),
 ];

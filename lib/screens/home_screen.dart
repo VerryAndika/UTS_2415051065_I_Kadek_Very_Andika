@@ -8,12 +8,16 @@ import '../providers/book_provider.dart';
 import '../providers/collection_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/book_card.dart';
+import '../widgets/reading_stats_card.dart';
 import '../widgets/responsive.dart';
+import '../widgets/saved_book_tile.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_card.dart';
 import 'book_detail_screen.dart';
+import 'saved_book_detail_screen.dart';
 
-// Home/Dashboard: sapaan, pencarian cepat, ringkasan koleksi, rekomendasi.
+// Home/Dashboard: identitas, pencarian cepat, statistik bacaan,
+// buku yang sedang dibaca (database), dan rekomendasi (REST API).
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, this.onOpenCatalog});
 
@@ -26,6 +30,7 @@ class HomeScreen extends StatelessWidget {
     final books = context.watch<BookProvider>();
     final collection = context.watch<CollectionProvider>();
     final recommended = books.recommended;
+    final reading = collection.currentlyReading.take(compact ? 2 : 4).toList();
 
     Widget bookAt(BuildContext context, int i) {
       final Book book = recommended[i];
@@ -33,6 +38,10 @@ class HomeScreen extends StatelessWidget {
         title: book.title,
         author: book.authorText,
         coverUrl: book.coverUrl(),
+        subtitle: book.firstPublishYear?.toString(),
+        trailing: collection.isSaved(book.key)
+            ? const Icon(Icons.bookmark, size: 18)
+            : null,
         onTap: () => Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (_) => BookDetailScreen(book: book))),
@@ -78,8 +87,9 @@ class HomeScreen extends StatelessWidget {
         child: Text('Belum ada rekomendasi.'),
       );
     } else if (compact) {
+      // Compact: list horizontal; layar lebar: grid responsif.
       recommendations = SizedBox(
-        height: 250,
+        height: 260,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -93,14 +103,20 @@ class HomeScreen extends StatelessWidget {
       recommendations = ResponsiveGrid(
         shrinkWrap: true,
         minItemWidth: 170,
-        itemCount: recommended.length,
+        itemCount: recommended.length.clamp(0, 12),
         itemBuilder: bookAt,
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppConfig.appName),
+        title: const Row(
+          children: [
+            Icon(Icons.auto_stories),
+            SizedBox(width: 8),
+            Text(AppConfig.appName),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: 'Ganti tema',
@@ -113,53 +129,141 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: MaxWidth(
-        child: ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Halo, ${AppConfig.studentName}',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const Text(
-                    '${AppConfig.studentId} • ${AppConfig.studentClass}',
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    readOnly: true,
-                    onTap: onOpenCatalog,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.search),
-                      hintText: 'Cari judul atau penulis...',
+      body: RefreshIndicator(
+        onRefresh: () =>
+            Future.wait([collection.load(), books.loadRecommendations()]),
+        child: MaxWidth(
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              _GreetingCard(onSearch: onOpenCatalog),
+              const SectionHeader(title: 'Statistik Bacaan'),
+              // Compact: grid 2 kolom; layar lebar: 4 kartu dalam satu baris.
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: GridView.count(
+                  crossAxisCount: compact ? 2 : 4,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  childAspectRatio: compact ? 2.1 : 2.6,
+                  children: stats,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: ReadingStatsCard(
+                  total: collection.items.length,
+                  done: collection.countByStatus(ReadingStatus.done),
+                  pagesRead: collection.pagesRead,
+                  averageRating: collection.averageRating,
+                ),
+              ),
+              if (reading.isNotEmpty) ...[
+                const SectionHeader(title: 'Sedang Dibaca'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: compact ? 1 : 2,
+                      mainAxisExtent: SavedBookTile.height,
+                    ),
+                    itemCount: reading.length,
+                    itemBuilder: (context, i) => SavedBookTile(
+                      book: reading[i],
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              SavedBookDetailScreen(bookId: reading[i].id!),
+                        ),
+                      ),
                     ),
                   ),
-                ],
+                ),
+              ],
+              SectionHeader(
+                title: 'Rekomendasi',
+                action: 'Lihat semua',
+                onAction: onOpenCatalog,
               ),
-            ),
-            const SectionHeader(title: 'Koleksi Saya'),
-            // Compact: grid 2 kolom; layar lebar: 4 kartu dalam satu baris.
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: GridView.count(
-                crossAxisCount: compact ? 2 : 4,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: compact ? 2.1 : 2.6,
-                children: stats,
-              ),
-            ),
-            SectionHeader(
-              title: 'Rekomendasi',
-              action: 'Lihat semua',
-              onAction: onOpenCatalog,
-            ),
-            recommendations,
-          ],
+              recommendations,
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _GreetingCard extends StatelessWidget {
+  const _GreetingCard({this.onSearch});
+
+  final VoidCallback? onSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [scheme.primaryContainer, scheme.tertiaryContainer],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: scheme.primary,
+                foregroundColor: scheme.onPrimary,
+                child: const Text('VA'),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Halo, ${AppConfig.studentName}',
+                      style: text.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: scheme.onPrimaryContainer,
+                      ),
+                    ),
+                    Text(
+                      '${AppConfig.studentId} • Kelas ${AppConfig.studentClass}',
+                      style: TextStyle(color: scheme.onPrimaryContainer),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            readOnly: true,
+            onTap: onSearch,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              hintText: 'Mau baca apa hari ini?',
+              filled: true,
+              fillColor: scheme.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(28),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

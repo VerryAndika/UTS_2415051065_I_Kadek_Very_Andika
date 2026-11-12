@@ -120,7 +120,7 @@ class CollectionScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columns,
-              mainAxisExtent: 128,
+              mainAxisExtent: SavedBookTile.height,
             ),
             itemCount: items.length,
             itemBuilder: (context, i) => _tile(context, items[i]),
