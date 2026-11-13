@@ -1,11 +1,11 @@
 {
-    "name": "BookFinder",
-    "short_name": "BookFinder",
+    "name": "Learning Library",
+    "short_name": "Learning",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
-    "theme_color": "#3F51B5",
-    "description": "BookFinder - Project UTS Pemrograman Mobile",
+    "theme_color": "#0F766E",
+    "description": "Learning Library - Project UTS Pemrograman Mobile",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -114,21 +114,25 @@ class ItemProfileScreen extends StatelessWidget {
       _InfoCard(
         icon: Icons.explore_outlined,
         title: 'Status eksplorasi',
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SegmentedButton<ItemStatus>(
-            showSelectedIcon: false,
-            segments: [
-              for (final s in ItemStatus.values)
-                ButtonSegment(
-                  value: s,
-                  icon: Icon(s.icon),
-                  label: Text(s.label),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final s in ItemStatus.values)
+              ChoiceChip(
+                avatar: Icon(
+                  s.icon,
+                  size: 18,
+                  color: item.status == s ? null : s.color,
                 ),
-            ],
-            selected: {item.status},
-            onSelectionChanged: (v) => _setStatus(context, item, v.first),
-          ),
+                label: Text(s.label),
+                selected: item.status == s,
+                selectedColor: s.color.withValues(alpha: 0.2),
+                onSelected: (_) {
+                  if (item.status != s) _setStatus(context, item, s);
+                },
+              ),
+          ],
         ),
       ),
       if ((item.description ?? '').isNotEmpty ||

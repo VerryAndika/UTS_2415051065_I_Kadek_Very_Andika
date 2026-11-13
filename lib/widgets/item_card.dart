@@ -20,62 +20,75 @@ class ItemCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ItemThumb(item: item, width: 74, height: 112, radius: 10),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '${item.mediaType.label} · ${item.topic}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.bodySmall?.copyWith(
-                        color: mediaColor(item.mediaType),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      reason,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.bodySmall,
-                    ),
-                    const Spacer(),
-                    Row(
+        child: LayoutBuilder(
+          // Kartu sempit (mis. kolom kanban): thumbnail diperkecil.
+          builder: (context, c) {
+            final narrow = c.maxWidth < 320;
+            return Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ItemThumb(
+                    item: item,
+                    width: narrow ? 40 : 74,
+                    height: narrow ? 56 : 112,
+                    radius: narrow ? 8 : 10,
+                  ),
+                  SizedBox(width: narrow ? 8 : 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(child: Pill.status(item.status, dense: true)),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: Text(
-                            'via ${item.source}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: text.labelSmall,
+                        Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: text.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
+                        Text(
+                          '${item.mediaType.label} · ${item.topic}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: text.bodySmall?.copyWith(
+                            color: mediaColor(item.mediaType),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          reason,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: text.bodySmall,
+                        ),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Pill.status(item.status, dense: true),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                'via ${item.source}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: text.labelSmall,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  ?trailing,
+                ],
               ),
-              ?trailing,
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
