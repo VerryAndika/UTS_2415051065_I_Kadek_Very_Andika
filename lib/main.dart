@@ -6,17 +6,20 @@ import 'config/app_config.dart';
 import 'config/app_theme.dart';
 import 'config/supabase_config.dart';
 import 'providers/book_provider.dart';
-import 'providers/collection_provider.dart';
+import 'providers/library_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/topic_provider.dart';
 import 'repositories/book_repository.dart';
-import 'repositories/saved_book_repository.dart';
+import 'repositories/learning_item_repository.dart';
+import 'repositories/topic_repository.dart';
 import 'screens/home_shell.dart';
 import 'services/book_data_source.dart';
+import 'services/learning_item_data_source.dart';
 import 'services/open_library_service.dart';
-import 'services/saved_book_data_source.dart';
-import 'services/supabase_saved_book_service.dart';
+import 'services/supabase_learning_item_service.dart';
+import 'services/topic_service.dart';
 
-// BookFinder - Project UTS Pemrograman Mobile
+// Learning Library - Project UTS Pemrograman Mobile
 // 2415051065 - I Kadek Very Andika (5 IKI)
 //
 // Arsitektur: UI (screens/widgets) -> providers -> repositories
@@ -29,31 +32,36 @@ Future<void> main() async {
   );
 
   // Sumber data dipilih di satu tempat ini saja:
-  // katalog dari REST API, koleksi pribadi dari database Supabase.
+  // - Learning Library  : database Supabase (tabel learning_items)
+  // - Discover buku     : REST API Open Library
+  // - Ringkasan topik   : REST API Wikipedia
+  final LearningItemDataSource librarySource = SupabaseLearningItemService();
   final BookDataSource bookSource = OpenLibraryService();
-  final SavedBookDataSource savedSource = SupabaseSavedBookService();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => BookProvider(BookRepository(bookSource))
-            ..loadRecommendations()
-            ..search(BookProvider.defaultQuery),
+          create: (_) =>
+              LibraryProvider(LearningItemRepository(librarySource))..load(),
         ),
         ChangeNotifierProvider(
           create: (_) =>
-              CollectionProvider(SavedBookRepository(savedSource))..load(),
+              BookProvider(BookRepository(bookSource))
+                ..search(BookProvider.defaultQuery),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TopicProvider(TopicRepository(TopicService())),
         ),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: const BookFinderApp(),
+      child: const LearningLibraryApp(),
     ),
   );
 }
 
-class BookFinderApp extends StatelessWidget {
-  const BookFinderApp({super.key});
+class LearningLibraryApp extends StatelessWidget {
+  const LearningLibraryApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ class BookProvider extends ChangeNotifier {
 
   final BookRepository _repository;
 
-  static const defaultQuery = 'programming';
+  static const defaultQuery = 'psychology';
   static const recommendationQuery = 'software engineering';
 
   // --- Pencarian (Katalog) ---

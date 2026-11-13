@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../config/app_config.dart';
 import '../config/supabase_config.dart';
+import '../providers/library_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/responsive.dart';
 
@@ -14,6 +15,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final theme = context.watch<ThemeProvider>();
+    final library = context.watch<LibraryProvider>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
@@ -45,6 +47,12 @@ class ProfileScreen extends StatelessWidget {
               'Kelas ${AppConfig.studentClass}',
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 8),
+            Text(
+              '${library.items.length} item • ${library.topicCounts.length} topik',
+              textAlign: TextAlign.center,
+              style: text.bodySmall,
+            ),
             const SizedBox(height: 16),
             Card(
               child: SwitchListTile(
@@ -61,15 +69,18 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: Icon(Icons.info_outline),
+                    leading: Icon(Icons.local_library_outlined),
                     title: Text(AppConfig.appName),
-                    subtitle: Text('Project UTS Pemrograman Mobile — v1.0.0'),
+                    subtitle: Text(
+                      '${AppConfig.tagline}\nProject UTS Pemrograman Mobile — v2.0.0',
+                    ),
+                    isThreeLine: true,
                   ),
                   ListTile(
                     leading: Icon(Icons.public),
                     title: Text('REST API'),
                     subtitle: Text(
-                      'Open Library — ${AppConfig.openLibraryBaseUrl}',
+                      'Open Library (Discover buku) • Wikipedia (ringkasan topik)',
                     ),
                   ),
                   ListTile(
@@ -77,7 +88,7 @@ class ProfileScreen extends StatelessWidget {
                     title: Text('Database'),
                     subtitle: Text(
                       'Supabase (PostgreSQL) — tabel '
-                      '${SupabaseConfig.savedBooksTable}',
+                      '${SupabaseConfig.learningItemsTable}',
                     ),
                   ),
                 ],

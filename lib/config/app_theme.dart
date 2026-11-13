@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const seed = Color(0xFF3F51B5);
+  static const seed = Color(0xFF0F766E); // teal: pengetahuan & rasa ingin tahu
 
   static ThemeData light() => _base(Brightness.light);
   static ThemeData dark() => _base(Brightness.dark);
