@@ -11,7 +11,7 @@ void main() {
       const PostgrestException(message: 'duplicate key', code: '23505'),
     );
     expect(e.kind, AppErrorKind.validation);
-    expect(e.message, contains('sudah ada di koleksi'));
+    expect(e.message, contains('sudah ada'));
   });
 
   test('42501 (RLS) -> permission', () {

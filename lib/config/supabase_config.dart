@@ -10,5 +10,6 @@ class SupabaseConfig {
   static const publishableKey =
       'sb_publishable_S6sSZIOkiKz5cEm8b4g91w_ISodHtit';
 
-  static const savedBooksTable = 'saved_books';
+  static const savedBooksTable = 'saved_books'; // v1 (BookFinder)
+  static const learningItemsTable = 'learning_items'; // v2 (Learning Library)
 }

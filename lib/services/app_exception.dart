@@ -46,10 +46,7 @@ class AppException implements Exception {
     if (error is PostgrestException) {
       final code = error.code;
       final (message, kind) = switch (code) {
-        '23505' => (
-          'Buku ini sudah ada di koleksi (data duplikat).',
-          AppErrorKind.validation,
-        ),
+        '23505' => ('Data ini sudah ada (duplikat).', AppErrorKind.validation),
         '23514' => (
           'Data ditolak database: nilai tidak memenuhi aturan '
               '(rating 1–5, halaman tidak melebihi total).',
